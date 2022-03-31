@@ -56,6 +56,17 @@ ENV NODE_ENV=production
 EXPOSE 3000
 EXPOSE 3005
 WORKDIR /opt/one-app
-USER $USER
-CMD ["node", "lib/server"]
+USER root
+RUN apk upgrade --no-cache && \
+    apk add --no-cache --virtual=run-deps \
+      dnsmasq
+
+RUN echo -e "log-queries\nno-resolv\n" > /etc/dnsmasq.d/00-base.conf
+RUN echo -e "cache-size=60\n" > /etc/dnsmasq.d/01-cache.conf
+
+USER root
+
+ENTRYPOINT /scripts/startEntrypoint.sh
+COPY --chown=node:node ./scripts /scripts
+RUN chmod 755 /scripts/*
 COPY --from=builder --chown=node:node /opt/one-app/production ./
