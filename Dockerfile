@@ -59,12 +59,12 @@ WORKDIR /opt/one-app
 USER root
 RUN apk upgrade --no-cache && \
     apk add --no-cache --virtual=run-deps \
+      sudo \
       dnsmasq
 
-RUN echo -e "log-queries\nno-resolv\n" > /etc/dnsmasq.d/00-base.conf
+RUN echo -e "log-queries\nno-resolv\nport=5300" > /etc/dnsmasq.d/00-base.conf
 RUN echo -e "cache-size=60\n" > /etc/dnsmasq.d/01-cache.conf
-
-USER root
+RUN echo -e "ALL ALL=(ALL) NOPASSWD: ALL\n" > /etc/sudoers
 
 ENTRYPOINT /scripts/startEntrypoint.sh
 COPY --chown=node:node ./scripts /scripts
